@@ -16,6 +16,7 @@ from pathlib import Path
 from types import ModuleType
 
 import numpy as np
+import pytest
 
 from hqnn_forge.diagnostics import stratified_subsample_indices
 
@@ -107,3 +108,50 @@ class TestStratifiedSubset:
         X, y = _data([5, 3])
         _, y_sub = example.stratified_subset(X, y, 4)
         assert np.bincount(y_sub).tolist() == [3, 1]
+
+
+class _ReachedDatasetCreation(Exception):
+    """Stop execution after argument validation succeeds."""
+
+
+def _stop_before_dataset_creation(*args, **kwargs):
+    raise _ReachedDatasetCreation
+
+
+@pytest.mark.parametrize(
+    ("args", "message"),
+    [
+        (["--max-rows", "1"], "--max-rows: must be an integer >= 2; got 1"),
+        (["--folds", "1"], "--folds: must be an integer >= 2; got 1"),
+        (["--epochs", "0"], "--epochs: must be an integer >= 1; got 0"),
+        (["--qubits", "0"], "--qubits: must be an integer >= 1; got 0"),
+        (["--layers", "0"], "--layers: must be an integer >= 1; got 0"),
+        (["--seeds", "0"], "--seeds: must be an integer >= 1; got 0"),
+    ],
+)
+def test_invalid_integer_options(args, message, monkeypatch, capsys) -> None:
+    monkeypatch.setattr(example, "synthetic", _stop_before_dataset_creation)
+
+    with pytest.raises(SystemExit) as exc_info:
+        example.main(args)
+
+    assert exc_info.value.code == 2
+    assert message in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["--max-rows", "2"],
+        ["--folds", "2"],
+        ["--epochs", "1"],
+        ["--qubits", "1"],
+        ["--layers", "1"],
+        ["--seeds", "1"],
+    ],
+)
+def test_valid_integer_option_boundaries(args, monkeypatch) -> None:
+    monkeypatch.setattr(example, "synthetic", _stop_before_dataset_creation)
+
+    with pytest.raises(_ReachedDatasetCreation):
+        example.main(args)

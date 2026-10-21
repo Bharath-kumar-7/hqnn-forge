@@ -98,8 +98,8 @@ def main(argv: list[str] | None = None) -> None:
         parser.error(f"argument --folds: must be an integer >= 2; got {args.folds}")
     if args.epochs < 1:
         parser.error(f"argument --epochs: must be an integer >= 1; got {args.epochs}")
-    if args.qubits < 1:
-        parser.error(f"argument --qubits: must be an integer >= 1; got {args.qubits}")
+    if args.qubits < 2:
+        parser.error(f"argument --qubits: must be an integer >= 2; got {args.qubits}")
     if args.layers < 1:
         parser.error(f"argument --layers: must be an integer >= 1; got {args.layers}")
     if args.seeds < 1:

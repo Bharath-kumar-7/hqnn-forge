@@ -637,6 +637,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `examples/benchmark_rydberg_features.py`: checking `--out` no longer opens FIFOs or
   devices, and valid long output filenames are accepted without making the temporary
   probe name too long (#628)
+- `examples/benchmark_rydberg_features.py`: `preprocess` standardises the raw columns with
+  `standardise_features`, so a column constant on the fitting rows up to rounding (σ of a few
+  ulp, not exactly 0) is only centred instead of scaled to unit variance, where its rounding
+  noise could take a principal component. Inputs, and so every arm's scores, change only on
+  datasets with such a column. Such a column no longer adds to the centred rank either, so on
+  a dataset where it was what lifted the rank to `n_atoms`, `PCANormalizer.fit` now raises
+  `centred data has rank r < n_components` and the run stops, where it used to take the
+  rounding noise as an input (#580, #600)
 
 ### Removed
 - `PCANormalizer`'s `copy` option, which never had an effect (#77)

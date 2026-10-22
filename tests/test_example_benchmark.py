@@ -126,6 +126,7 @@ def _stop_before_dataset_creation(*args: object, **kwargs: object) -> NoReturn:
     ("args", "message"),
     [
         (["--max-rows", "1"], "--max-rows: must be an integer >= 2; got 1"),
+        (["--max-rows", "0"], "--max-rows: must be an integer >= 2; got 0"),
         (["--folds", "1"], "--folds: must be an integer >= 2; got 1"),
         (["--epochs", "0"], "--epochs: must be an integer >= 1; got 0"),
         (["--qubits", "1"], "--qubits: must be an integer >= 2; got 1"),

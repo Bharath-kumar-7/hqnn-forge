@@ -6,6 +6,9 @@ tests/test_example_benchmark.py
 ``stratified_subset`` keeps the rows of
 :func:`hqnn_forge.diagnostics.stratified_subsample_indices` (#541), checked
 here against that function called directly.
+
+``main(argv)`` refuses an integer option below its minimum with a usage
+error before any data is built (#661).
 """
 
 from __future__ import annotations
@@ -14,6 +17,7 @@ import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
+from typing import NoReturn
 
 import numpy as np
 import pytest
@@ -114,7 +118,7 @@ class _ReachedDatasetCreation(Exception):
     """Stop execution after argument validation succeeds."""
 
 
-def _stop_before_dataset_creation(*args, **kwargs):
+def _stop_before_dataset_creation(*args: object, **kwargs: object) -> NoReturn:
     raise _ReachedDatasetCreation
 
 
@@ -129,7 +133,12 @@ def _stop_before_dataset_creation(*args, **kwargs):
         (["--seeds", "0"], "--seeds: must be an integer >= 1; got 0"),
     ],
 )
-def test_invalid_integer_options(args, message, monkeypatch, capsys) -> None:
+def test_invalid_integer_options(
+    args: list[str],
+    message: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     monkeypatch.setattr(example, "synthetic", _stop_before_dataset_creation)
 
     with pytest.raises(SystemExit) as exc_info:
@@ -150,7 +159,7 @@ def test_invalid_integer_options(args, message, monkeypatch, capsys) -> None:
         ["--seeds", "1"],
     ],
 )
-def test_valid_integer_option_boundaries(args, monkeypatch) -> None:
+def test_valid_integer_option_boundaries(args: list[str], monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(example, "synthetic", _stop_before_dataset_creation)
 
     with pytest.raises(_ReachedDatasetCreation):

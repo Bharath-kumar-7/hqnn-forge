@@ -665,6 +665,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   degenerate eigenvalues. When the Hamiltonian requires grad, the propagator
   now comes from `torch.linalg.matrix_exp` instead of `eigh`; forward-mode AD
   is still affected (#674) (#505, #668)
+- `wilcoxon_signed_rank` and `rank_biserial_correlation` treat a paired difference of at most
+  `1e-12` as zero and absolute differences within `1e-12` of each other as tied, so round-off
+  no longer adds a pair or splits a tie; the new keyword `atol` sets the tolerance (#595, #681)
 
 ### Removed
 - `PCANormalizer`'s `copy` option, which never had an effect (#77)
